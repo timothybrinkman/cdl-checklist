@@ -3,277 +3,614 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
 <title>Class A Pre-Trip Checklist</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Class A CDL vehicle inspection, air brake check and basic control skills practice, based on the Nebraska CDL Manual (March 2026).">
+<meta name="theme-color" content="#16181b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: one narrow column, sticky section tabs, tap-row checklist like a DVIR card */
+/* Layout: one narrow column, sticky tabs + mode switch, tap-row checklist like a DVIR card */
 :root{
   --bg:#f3f2ee; --card:#ffffff; --fg:#1d1f22; --muted:#5d6168; --line:#dcdad3;
-  --accent:#e7a400; --accent-ink:#1d1f22; --ok:#2f7d4a; --warn:#b4471b;
+  --accent:#e7a400; --accent-ink:#1d1f22; --ok:#2f7d4a; --warn:#b4471b; --info:#2e5f8a;
   --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#16181b; --card:#1f2226; --fg:#ececea; --muted:#a2a6ad; --line:#30343a;
-  --accent:#f2b81e; --accent-ink:#16181b; --ok:#5cbf7d; --warn:#ef7a4a; color-scheme:dark}}
+  --accent:#f2b81e; --accent-ink:#16181b; --ok:#5cbf7d; --warn:#ef7a4a; --info:#7fb0dc; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#16181b; --card:#1f2226; --fg:#ececea; --muted:#a2a6ad; --line:#30343a;
-  --accent:#f2b81e; --accent-ink:#16181b; --ok:#5cbf7d; --warn:#ef7a4a; color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+  --accent:#f2b81e; --accent-ink:#16181b; --ok:#5cbf7d; --warn:#ef7a4a; --info:#7fb0dc; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
 header h1{font-family:var(--display);font-weight:700;font-size:2rem;line-height:1.05;margin:0;text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+.nw{white-space:nowrap}
 header p{margin:6px 0 0;color:var(--muted);font-size:.9rem;max-width:60ch}
 .stripe{height:6px;margin:14px 0 0;background:repeating-linear-gradient(135deg,var(--accent) 0 12px,var(--fg) 12px 24px);border-radius:2px;opacity:.9}
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-nav button{flex:0 0 auto;font-family:var(--display);font-weight:600;font-size:1rem;text-transform:uppercase;letter-spacing:.04em;border:1.5px solid var(--line);background:var(--card);color:var(--fg);padding:7px 12px;border-radius:6px;cursor:pointer}
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px 8px;display:grid;gap:8px}
+nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;min-height:44px;font-family:var(--display);font-weight:600;font-size:1rem;text-transform:uppercase;letter-spacing:.04em;border:1.5px solid var(--line);background:var(--card);color:var(--fg);padding:7px 12px;border-radius:6px;cursor:pointer}
 nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-nav button:focus-visible,.item:focus-visible,.tool:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.bar{display:flex;align-items:center;gap:10px;margin:4px 0 14px}
+nav button .dot{display:inline-block;min-width:1.4em;margin-left:4px;padding:0 5px;border-radius:9px;background:var(--warn);color:var(--card);font-family:var(--body);font-size:.75rem;letter-spacing:0;line-height:1.4;text-align:center}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
+.modes button{min-height:44px;font:inherit;font-weight:600;font-size:.9rem;border:0;border-left:1.5px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:6px 4px}
+.modes button:first-child{border-left:0}
+.modes button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+button:focus-visible,.item:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bar{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
 .meter{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
 .meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
 .count{font-variant-numeric:tabular-nums;font-weight:600;font-size:.9rem;min-width:4.5em;text-align:right}
-.tool{font:inherit;font-size:.85rem;border:1px solid var(--line);background:transparent;color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer}
+.tool{font:inherit;font-size:.85rem;min-height:40px;border:1px solid var(--line);background:transparent;color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer}
 .tool.armed{border-color:var(--warn);color:var(--warn)}
-.intro{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);padding:10px 12px;border-radius:6px;font-size:.88rem;margin-bottom:16px}
+.intro{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);padding:10px 12px;border-radius:6px;font-size:.88rem;margin-bottom:12px}
+.intro.warn{border-left-color:var(--warn)}
+.intro p{margin:0}.intro p+p{margin-top:6px}
 .intro b{font-weight:600}
-section h2{font-family:var(--display);font-weight:700;font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em;margin:22px 0 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-section h2 small{font-family:var(--body);font-weight:500;font-size:.8rem;color:var(--muted);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
+section h2{font-family:var(--display);font-weight:700;font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em;margin:22px 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+section h2 small{font-family:var(--body);font-weight:500;font-size:.8rem;color:var(--muted);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.secnote{margin:0 0 8px;color:var(--muted);font-size:.85rem}
+.tag{display:inline-block;font-family:var(--body);font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:4px;vertical-align:middle;margin-left:6px}
+.tag.t-exam{background:var(--fg);color:var(--bg)}
+.tag.t-supp{border:1px solid var(--muted);color:var(--muted)}
 .list{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.item{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border-top:1px solid var(--line);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.item{display:flex;gap:12px;align-items:flex-start;padding:12px;border-top:1px solid var(--line);min-height:52px}
 .item:first-child{border-top:0}
-.box{flex:0 0 22px;height:22px;border:2px solid var(--muted);border-radius:4px;margin-top:1px;display:grid;place-items:center}
+.item.tap{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.box{flex:0 0 24px;height:24px;border:2px solid var(--muted);border-radius:4px;margin-top:1px;display:grid;place-items:center}
 .item.done .box{background:var(--ok);border-color:var(--ok)}
 .item.done .box::after{content:"";width:6px;height:11px;border:solid var(--card);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.txt{min-width:0}
-.txt strong{font-weight:600;display:block}
+.txt{min-width:0;flex:1}
+.txt strong{font-weight:600}
 .item.done .txt strong{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
-.txt span{display:block;color:var(--muted);font-size:.86rem;margin-top:2px}
+.det{display:block;color:var(--muted);font-size:.88rem;margin-top:3px}
+.det ul{margin:4px 0 0;padding-left:18px}.det li{margin:2px 0}
+.badges{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:4px;vertical-align:middle}
+.badge{font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:4px;white-space:nowrap}
+.badge.af{background:var(--warn);color:var(--card)}
+.badge.mfr{border:1px solid var(--info);color:var(--info)}
+.badge.caution{border:1px solid var(--warn);color:var(--warn)}
 .num{font-variant-numeric:tabular-nums;font-weight:600;color:var(--fg)}
-.foot{margin-top:24px;color:var(--muted);font-size:.8rem}
+.memrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.btn{font:inherit;font-weight:600;font-size:.9rem;min-height:44px;padding:8px 14px;border-radius:6px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.good{border-color:var(--ok);color:var(--ok)}
+.btn.bad{border-color:var(--warn);color:var(--warn)}
+.btn.big{min-height:56px;font-size:1rem;flex:1}
+.chip{font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;white-space:nowrap}
+.chip.ok{background:var(--ok);color:var(--card)}
+.chip.miss{background:var(--warn);color:var(--card)}
+dl.terms{margin:0;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 12px}
+dl.terms dt{font-weight:600;margin-top:10px}
+dl.terms dd{margin:2px 0 10px;color:var(--muted);font-size:.88rem}
+.exam{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+.exam .where{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.exam .name{font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1.1;text-transform:uppercase;text-wrap:balance}
+.exam .say{font-size:.9rem;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.score{font-family:var(--display);font-weight:700;font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums}
+table.hist{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+table.hist th,table.hist td{text-align:left;padding:7px 6px;border-top:1px solid var(--line)}
+table.hist th{color:var(--muted);font-weight:500;border-top:0}
+.tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.empty{color:var(--muted);font-size:.9rem;padding:14px;background:var(--card);border:1px dashed var(--line);border-radius:8px}
+details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+.foot{margin-top:28px;color:var(--muted);font-size:.8rem;display:grid;gap:6px}
+.foot a{color:var(--fg)}
+.up{color:var(--ok);font-weight:600}.down{color:var(--warn);font-weight:600}
 @media (prefers-reduced-motion:reduce){.meter i{transition:none}}
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header>
-    <h1>Class A Pre-Trip &amp; Air Brake Checklist</h1>
-    <p>Tap each item as you check it. Progress saves on this device. Point to it, touch it, name it, and say what you're looking for.</p>
+    <h1>Class A <span class="nw">Pre-Trip</span> &amp; Air Brake Checklist</h1>
+    <p>Built on the Nebraska CDL Manual (March 2026), Sections 11–13. Name it, point to or touch it, and explain what you're inspecting it for.</p>
     <div class="stripe"></div>
   </header>
-  <nav id="tabs" role="tablist"></nav>
-  <div class="bar">
-    <div class="meter"><i id="meter"></i></div>
-    <div class="count" id="count">0 / 0</div>
+
+  <div class="sticky">
+    <nav id="tabs" role="tablist" aria-label="Sections"></nav>
+    <div class="modes" id="modes" role="group" aria-label="Practice mode">
+      <button type="button" data-mode="guided" aria-pressed="true">Guided</button>
+      <button type="button" data-mode="memory" aria-pressed="false">Memory</button>
+      <button type="button" data-mode="exam" aria-pressed="false">Exam sim</button>
+    </div>
+  </div>
+
+  <div class="bar" id="bar">
+    <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+    <div class="count" id="count" aria-live="polite">0 / 0</div>
     <button class="tool" id="reset" type="button">Reset tab</button>
   </div>
-  <div id="panel"></div>
-  <p class="foot">Built from the standard CDL manual inspection sequence (Nebraska uses it in Section 11). Follow your school's order and your truck's specs if they differ.</p>
+
+  <main id="panel" role="tabpanel"></main>
+
+  <div class="foot">
+    <p>Official reference: <a href="https://dmv.nebraska.gov/sites/default/files/doc/Nebraska%20MOD%20CDL%20Driver's%20Manual%20-%20March%202026.pdf" target="_blank" rel="noopener">Nebraska CDL Driver's Manual, March 2026 (PDF)</a>. If this app and the manual ever disagree, the manual wins. Know your own truck's manufacturer specs.</p>
+    <p id="verify"></p>
+    <p>Progress is saved only on this device. <span id="offline"></span></p>
+  </div>
 </div>
 
 <script>
-const S = (t, d) => ({t, d});
-const DATA = [
- {id:"pretrip", name:"Pre-Trip", intro:"<b>Script for every part:</b> “Mounted secure, not cracked, bent or broken.” For hoses and lines: “No leaks, cuts or abrasions.” Say it out loud on test day.",
-  sections:[
-  {h:"Approach & under hood", items:[
-    S("Leaks under truck","Fresh puddles of oil, coolant, fuel, grease, DEF"),
-    S("Truck leaning?","Level, not sagging to one side"),
-    S("Engine oil level","Dipstick within safe range, no leaks"),
-    S("Coolant level","Sight glass or reservoir in range, no leaks"),
-    S("Power steering fluid","Dipstick or sight glass at level, hoses no leaks"),
-    S("Water pump","Mounted secure, no leaks, gear or belt driven"),
-    S("Alternator","Mounted secure, wiring tight, belt driven if equipped"),
-    S("Air compressor","Mounted secure, not cracked, no air leaks"),
-    S("Belts","Snug, not frayed or cracked; about ½–¾ in. play"),
-    S("Hoses & wiring","No leaks, cracks, bare or loose wires"),
-  ]},
-  {h:"Steering", items:[
-    S("Steering box","Mounted secure, no missing nuts or bolts, no leaks"),
-    S("Steering linkage","Pitman arm, drag link, tie rod: not cracked, bent or worn, cotter pins in"),
-    S("Power steering hoses","No leaks, cuts or abrasions"),
-  ]},
-  {h:"Front suspension", items:[
-    S("Springs / air bags","No missing, shifted, cracked or broken leaves; bags not leaking"),
-    S("Spring mounts & U-bolts","Mounted secure, not cracked or broken"),
-    S("Shock absorbers","Secure, no leaks"),
-  ]},
-  {h:"Front brakes", items:[
-    S("Slack adjuster & pushrod","No more than 1 in. play when pulled by hand"),
-    S("Brake chamber","Mounted secure, no air leaks"),
-    S("Brake hoses / lines","No leaks, cracks or wear"),
-    S("Drum & linings","Drum not cracked; lining at least ¼ in., no grease or oil"),
-  ]},
-  {h:"Front wheel", items:[
-    S("Tire tread & condition","Steer tires at least 4/32 in. tread; no cuts, bulges, recaps on steer"),
-    S("Tire inflation","Check with gauge"),
-    S("Rim","No cracks, bends or illegal welds"),
-    S("Lug nuts","All present, no rust trails or shiny threads"),
-    S("Hub oil seal","Oil at level, no leaks"),
-    S("Valve stem & cap","Present, not damaged"),
-  ]},
-  {h:"Front of truck & side", items:[
-    S("Headlights (low/high), turn signals, 4-ways","All working, correct color, clean"),
-    S("Clearance & ID lights","Working, amber in front"),
-    S("Windshield & wipers","Glass clean, not cracked; wiper arms and blades secure"),
-    S("Mirrors","Secure, clean, adjusted"),
-    S("Door & hinges","Opens, closes, latches; seals good"),
-    S("Fuel tank, cap & straps","Secure, no leaks, cap tight"),
-    S("Battery box","Secure, cover in place, no corrosion"),
-    S("Driveshaft","Not bent or cracked, U-joints secure"),
-    S("Exhaust system","Secure, no leaks, no carbon soot at joints"),
-    S("Frame & crossmembers","No cracks, bends or missing bolts"),
-  ]},
-  {h:"Drive axles (each side)", items:[
-    S("Drive tires","At least 2/32 in. tread, even wear, inflation good"),
-    S("Dual spacing","Not touching, nothing stuck between"),
-    S("Rims, lug nuts, axle seal","Same checks as the steer wheel"),
-    S("Rear suspension","Springs/air bags, mounts, U-bolts, shocks, torque arms"),
-    S("Rear brakes","Slack adjusters, chambers, hoses, drums, linings"),
-    S("Splash guards / mud flaps","Secure, not dragging"),
-  ]},
-  {h:"Trailer (each side & rear)", items:[
-    S("Trailer front","Lights and reflectors working; header board secure"),
-    S("Landing gear","Fully raised, handle stowed, not bent or damaged"),
-    S("Frame & cross members","No cracks or bends"),
-    S("Tandem release / locking pins","Pins fully engaged, release arm locked"),
-    S("Trailer suspension & brakes","Same checks as tractor"),
-    S("Trailer tires & wheels","Same checks as drive axles"),
-    S("Rear doors & hinges","Close and latch securely"),
-    S("Rear lights & reflectors","Tail, brake, turn, clearance lights working"),
-    S("License plate & DOT bumper","Present, clean, secure"),
-  ]},
-  {h:"In cab", items:[
-    S("Safe start","Parking brake set, transmission in neutral, clutch in"),
-    S("Gauges come up","Oil pressure rises, voltmeter normal, air pressure builds"),
-    S("Warning lights & buzzers","Go out after start (ABS lamp cycles off)"),
-    S("Steering play","No more than 10°, about 2 in. on a 20 in. wheel"),
-    S("Horns","City and air horn work"),
-    S("Heater / defroster","Working"),
-    S("Mirrors & windshield","Clean, adjusted, no obstruction"),
-    S("Wipers & washer","Work on all speeds"),
-    S("Seat belt","Latches and releases, not frayed"),
-    S("Emergency equipment","Fire extinguisher charged & secured; 3 reflective triangles; spare fuses if needed"),
-  ]},
- ]},
- {id:"air", name:"Air Brakes", intro:"<b>Nebraska tip:</b> examiners expect the in-cab air brake check as part of the inspection. Chock wheels, get to full pressure, then go in this order. Numbers below are the CDL manual limits.",
-  sections:[
-  {h:"In-cab air brake check", items:[
-    S("Build to governed pressure","Engine running, air at governor cut-out (around 125 psi)"),
-    S("Shut off engine, key on","Chock wheels, release parking brakes (push in both knobs)"),
-    S("Static leak (optional)","Brakes released, watch 1 minute"),
-    S("Applied leakage test","Full foot-brake hold for 1 minute: loss no more than <span class=num>4 psi</span> combination (3 psi single unit)"),
-    S("Low air warning","Fan the brake down: buzzer and light on at or before <span class=num>60 psi</span>"),
-    S("Spring brakes pop","Keep fanning: tractor protection and parking valves pop out between <span class=num>20–45 psi</span>"),
-    S("Start engine, build-up rate","Dual air: <span class=num>85→100 psi within 45 seconds</span> at fast idle"),
-    S("Governor cut-out / cut-in","Cuts out around 125 psi; fan down, cuts back in around 100 psi"),
-    S("Tractor parking brake tug","Tractor brake set, trailer released, gentle pull in low gear: should hold"),
-    S("Trailer parking brake tug","Trailer brake set (red knob out), tractor released, gentle pull: should hold"),
-    S("Service brake test","About 5 mph, firm foot-brake stop: no pull, no delay"),
-  ]},
-  {h:"Air system walk-around", items:[
-    S("Air tanks drained","Drain moisture/oil (if equipped with manual drains)"),
-    S("Gladhands","Seals good, no leaks, locked together, dummy couplers stored"),
-    S("Air lines to trailer","Service (blue) and emergency (red) not tangled, crimped or dragging"),
-    S("Air dryer / compressor","Secure, no leaks"),
-  ]},
- ]},
- {id:"coupling", name:"Coupling", intro:"<b>Coupling check:</b> done between tractor and trailer. Look under the trailer apron with a flashlight.",
-  sections:[
-  {h:"Fifth wheel & kingpin", items:[
-    S("Mounting bolts & brackets","Secure, none missing, frame not cracked"),
-    S("Platform / skid plate","Greased, not cracked or bent"),
-    S("Locking jaws","Closed around the shank of the kingpin, not the head"),
-    S("Release arm","In the locked position, safety latch engaged"),
-    S("Kingpin & apron","Apron flat on the fifth wheel, no gap; kingpin not bent"),
-    S("Slide pins (sliding fifth wheel)","Locked in place"),
-  ]},
-  {h:"Connections", items:[
-    S("Electrical cord","Plugged in and locked, not damaged"),
-    S("Air lines","Connected, supported, no leaks"),
-    S("Catwalk","Clean, secure, nothing loose"),
-    S("Tug test","With trailer brakes set, gentle pull forward in low gear"),
-  ]},
- ]},
- {id:"skills", name:"Skills & Road", intro:"<b>Backing:</b> use mirrors, go slow, and get out and look (GOAL) when allowed. Pull-ups are allowed but cost points, so don't overdo them.",
-  sections:[
-  {h:"Basic control skills", items:[
-    S("Straight-line backing","Stay inside the lane lines, minimal corrections"),
-    S("Offset back (left or right)","Back into the adjacent lane, stop at the end"),
-    S("Parallel park (driver or conventional side)","Get into the box without hitting the lines or cones"),
-    S("Alley dock","Back into the dock, stop near the rear line"),
-    S("Before backing","4-way flashers on, check mirrors, tap horn"),
-  ]},
-  {h:"Road test habits", items:[
-    S("Mirror checks","Every 5–8 seconds, and before every lane change or turn"),
-    S("Signal early","Signal well before turns and lane changes, cancel after"),
-    S("Following distance","1 second per 10 ft of vehicle length, +1 second over 40 mph"),
-    S("Right turns","Stay right, swing wide into the turn, not before it"),
-    S("Intersections","Cover the brake, look left-right-left, no rolling stops"),
-    S("Railroad crossings","Look and listen, never shift on the tracks"),
-    S("Downgrades","Pick a low gear before the hill, no coasting"),
-    S("Expressway","Use the full ramp to match speed, merge into a gap"),
-    S("Stops","Stop behind the line, leave space to see the car's tires"),
-    S("Lane control","Stay centered, no curb strikes or lane straddling"),
-  ]},
- ]},
+"use strict";
+/* ---------- Content ----------
+   Exam content follows the modernized vehicle inspection test (Section 11),
+   basic control skills (Section 12) and road test (Section 13).
+   Badges: af = automatic failure, mfr = know manufacturer spec, caution = safety caution. */
+const CONTENT_VERSION = "2026-10-27";
+const VERIFY_NOTE = "Content version " + CONTENT_VERSION + ". Exam items match the AAMVA modernized test text (Sections 11–12) that the Nebraska manual is based on. Daily Extras numbers are from Section 2 of the Nebraska manual.";
+
+const I = (id, n, d, b) => ({id, n, d, b: b || []});
+const L = a => "<ul>" + a.map(x => "<li>" + x + "</li>").join("") + "</ul>";
+
+const AIR = [
+  I("ab1","1. Air gauge & governor cut-out",
+    "Chock the wheels and start the engine. Show the air gauge works and pressure builds to governor cut-out, about <span class=num>120–140 psi</span> or the manufacturer's spec. Know your truck's cut-out pressure.",["af","mfr"]),
+  I("ab2","2. Air leakage rate test",
+    "Engine off, key in the on / battery position. Release the parking brake (and the tractor protection valve on a combination). Fully apply the foot brake, let the gauge settle, then hold for one minute. Loss allowed:"
+    + L(["Combination vehicle: no more than <span class=num>4 psi</span> in 1 minute","Single vehicle: no more than <span class=num>3 psi</span> in 1 minute"]),["af"]),
+  I("ab3","3. Low air warning device test",
+    "Don't restart the engine; key stays on. Fan off air by pumping the foot brake. The low-air warning (buzzer, light and/or flag) must come on before pressure drops below <span class=num>55 psi</span>, or the level the manufacturer specifies.",["af","mfr"]),
+  I("ab4","4. Emergency brake activation test",
+    "Keep fanning the brake. The parking (emergency) brake valve should pop out between <span class=num>20–45 psi</span>."
+    + L(["Combination: the tractor protection valve and trailer air supply valve pop at the same time as, or before, the tractor parking valve",
+         "If the valves don't pop out, listen for air exhausting, which shows the spring brakes applied",
+         "With a backup air system, explain that its valves won't pop out",
+         "Know and describe your truck's air system specs"]),["af","mfr"]),
 ];
 
-let state = {};
-try { state = JSON.parse(localStorage.getItem("cdl-check") || "{}"); } catch(e) { state = {}; }
-let tab = DATA[0].id;
-try { const h = location.hash.slice(1); if (DATA.some(d=>d.id===h)) tab = h; } catch(e){}
-const save = () => { try { localStorage.setItem("cdl-check", JSON.stringify(state)); } catch(e){} };
+const TABS = [
+ { id:"inspection", name:"Inspection",
+   intro:"<p><b>Test checklist, in test order.</b> The test starts in the cab with the air brake check and engine start. On the steering axle (one axle), be ready to inspect any axle the examiner picks.</p><p>Script: <b>name it, point or touch, explain what you're inspecting for.</b> No explanation means no credit.</p>",
+   sections:[
+   {h:"In-vehicle / engine start", exam:true, sim:true, items:[
+     I("iv-air","Air brake check (all 4 parts)","Do all four parts on the Air Brake tab: gauge & governor cut-out, leakage rate, low-air warning, emergency brake activation. <b>Missing or doing any part wrong is an automatic failure of the inspection test.</b>",["af"]),
+     I("iv-park","Parking & trailer brake check","Tractor parking brake set, trailer brakes released: release the service brake and gently pull forward. The vehicle must hold. Then release the tractor brake, set the trailer parking brake, and gently pull forward. The trailer must hold, which also tests the coupling."),
+     I("iv-serv","Service brake check","At about <span class=num>5 mph</span>, apply the service brake to a full stop. The vehicle must not pull to either side and must stop when the brake is applied."),
+     I("iv-ind","Lighting indicators","Dash indicators work at start-up and when lights are switched on: left and right turn signals, 4-way flashers, high beam, ABS (trailer ABS lamp comes on then goes off, if equipped), DEF if equipped."),
+     I("iv-emer","Emergency equipment","3 red reflective triangles (or 6 fuses or 3 liquid-burning flares). Fire extinguisher charged and secured. Spare electrical fuses if used; otherwise say the truck uses circuit breakers."),
+     I("iv-wind","Windshield & traffic monitoring devices","Windshield clean, not obstructed (except an inspection sticker), no cracks or flaws. Mirrors clean and adjusted from the cab. Cameras/monitors (if equipped) clean, working, and adjusted."),
+     I("iv-wipe","Wipers & washers","Wiper arms and blades secure and not damaged, run smoothly. Washer fluid present and sprays when activated."),
+     I("iv-heat","Heater & defroster","Identify them and show they work."),
+     I("iv-horn","Horn(s)","Air and/or electric horn works."),
+   ]},
+   {h:"Lights operation check", exam:true, sim:true, items:[
+     I("lt-all","All external lights","Left and right turn signals, 4-ways, low and high beams, clearance/marker lights, taillights, brake lights (on when applied, off when released). On a combination you only check the trailer's rear lights at the back. You may ask the examiner to help, but you must direct them to each light. <b>Leave one out and you don't get credit.</b>"),
+   ]},
+   {h:"Front of vehicle / engine area", note:"Engine off.", exam:true, sim:true, items:[
+     I("fr-lens","Lenses","Front light lenses/covers are the proper color, clean, not broken or missing."),
+     I("fr-fluid","Fluid levels","Show where each dipstick or sight glass is. Engine oil, coolant and power steering fluid between the add and full marks (brake fluid too on hydraulic brakes). Never remove the radiator cap when the engine is hot.",["caution"]),
+     I("fr-leak","Fluid & air leaks","No puddles on the ground. No dripping on or under the engine and transmission. Hoses and air lines in good condition and not leaking."),
+     I("fr-steer","Steering system","Power steering box securely mounted and not leaking. Hoses and connections not cracked, worn, or leaking. No missing nuts, bolts, or cotter keys. Linkage from the box to the wheel (arms, rods, links) not worn or cracked; joints and sockets not worn or loose."),
+   ]},
+   {h:"Steering axle", note:"Be ready to do this same inspection on any axle.", exam:true, sim:true, items:[
+     I("ax-tire","Tires","Check inflation <b>with a tire gauge</b> (kicking or a mallet gets no credit). No cuts or damage that expose plies. Valve caps present, stems not damaged. No bumps or bulges. Duals the same size. Tread with a tread-depth gauge: at least <span class=num>4/32 in.</span> on steer tires, <span class=num>2/32 in.</span> on all others. With an automatic inflation or TPMS system, say pressure is monitored and show the system works.",["mfr"]),
+     I("ax-rim","Rims","Not damaged, cracked, or bent. No welding repairs. Rust trails can mean a loose rim on wedge wheels. Stud/bolt holes not out of round. No missing or loose nuts.",["caution"]),
+     I("ax-lug","Lug nuts","All present, none loose. No rust trails or shiny threads. No broken studs."),
+     I("ax-susp","Springs / mounts, air bags & shocks","Leaf springs not missing, shifted, cracked, or broken. Mounts (shackles, hangers, brackets) not cracked, broken, or missing parts. Air ride secure, not damaged or leaking. Shocks secure, not damaged or leaking. Truck sits level front to rear and side to side."),
+     I("ax-bline","Brake lines or hoses & leaks","Air or hydraulic lines to the brakes not leaking, cracked, worn, or frayed. Couplings and fittings secure."),
+     I("ax-bcont","Brake contaminants","Where you can reach them, linings/pads and drum/disc are free of grease, oil, or other contamination."),
+   ]},
+   {h:"Side of vehicle", exam:true, sim:true, items:[
+     I("sd-lens","Lenses & reflectors","Side lenses and reflectors on the tractor and trailer are the proper color, clean, not broken or missing."),
+     I("sd-mirr","Traffic monitoring devices","Mirrors clean and not cracked. Brackets not bent, mounted securely, no missing parts. Cameras (if equipped) clean."),
+     I("sd-batt","Battery","Batteries secure; connections tight with no heavy corrosion; cables secure, not cracked or worn; box or cover secure. If you can't see the batteries, tell the examiner."),
+     I("sd-fuel","Fuel tank(s) & DEF tank","Securely mounted, caps tight, no leaks from tanks or lines."),
+     I("sd-frame","Frame(s)","No cracks, broken welds, holes, or damage on the tractor or trailer frame. No cracks or holes in the cargo floor. Trailer tandem release lever and locking pins secure."),
+   ]},
+   {h:"Combination vehicles only", exam:true, sim:true, items:[
+     I("cb-lines","Air & electric lines & connectors","Check them on <b>both</b> the tractor and the trailer. Connectors seated, sealed, not damaged, locked. Lines not cut, cracked, chafed, spliced, taped, or worn; no braid or wire showing. Listen for air leaks. Not tangled, crimped, pinched, or dragging."),
+     I("cb-skid","Fifth wheel skid plate","Securely mounted to the platform. No cracks, breaks, or excessive wear. Lubricated if applicable."),
+     I("cb-king","Kingpin, apron & gap","Kingpin in place, not bent, damaged, or worn. Apron not bent, cracked, or broken. <b>No gap</b> between the apron and fifth wheel. Lubricated if applicable."),
+     I("cb-lock","Locking & safety devices","Look into the gap: jaws or lever fully closed around the kingpin, no play between kingpin and jaws. Release arm in the engaged position, safety latch in place if equipped. Sliding fifth wheel locking pins undamaged and fully engaged."),
+   ]},
+   {h:"Trailer only", exam:true, sim:true, items:[
+     I("tr-land","Landing gear & clearance","Fully raised, no missing parts, crank handle secured. Support frame and pads not damaged. If powered, no air or hydraulic leaks. Tractor frame clears the landing gear in turns."),
+     I("tr-tape","Reflective tape","Present on the sides and rear and securely attached."),
+   ]},
+   {h:"Rear of trailer", exam:true, sim:true, items:[
+     I("rr-lens","Lenses & reflectors","Rear lenses and reflectors are the proper color, clean, not broken or missing."),
+   ]},
+ ]},
 
-const tabs = document.getElementById("tabs");
-DATA.forEach(d => {
-  const b = document.createElement("button");
-  b.type="button"; b.role="tab"; b.id="tab-"+d.id; b.textContent=d.name;
-  b.onclick = () => { tab=d.id; render(); };
-  tabs.appendChild(b);
-});
+ { id:"air", name:"Air Brake",
+   intro:"<p><b>All four parts, in this order.</b> Not explaining and demonstrating every part correctly is an <b>automatic failure</b> of the vehicle inspection test.</p><p>Safety: chock the wheels first. Leave the tractor in neutral with the engine running or off as each step calls for.</p>",
+   warn:true,
+   sections:[
+   {h:"Four-part air brake check", exam:true, sim:true, items:AIR},
+   {h:"Hydraulic brakes (not on a typical tractor)", supp:true, note:"Only if your test vehicle has hydraulic brakes. It replaces the air brake check.", items:[
+     I("hy-check","Hydraulic brake check","Warning lights work as the manufacturer specifies. In park, note pedal height, pump the pedal three times, then hold for five seconds (or the manufacturer's method). The pedal shouldn't sink after the first press and should feel firm. Any power assist works.",["af","mfr"]),
+   ]},
+ ]},
 
-function render(){
-  const d = DATA.find(x=>x.id===tab);
-  [...tabs.children].forEach(b=>b.setAttribute("aria-selected", b.id==="tab-"+tab));
-  const panel = document.getElementById("panel");
-  panel.innerHTML = `<div class="intro">${d.intro}</div>`;
-  d.sections.forEach((s,si) => {
-    const sec = document.createElement("section");
-    const keys = s.items.map((_,ii)=>`${d.id}.${si}.${ii}`);
-    const done = keys.filter(k=>state[k]).length;
-    sec.innerHTML = `<h2>${s.h}<small>${done}/${keys.length}</small></h2>`;
-    const list = document.createElement("div"); list.className="list";
-    s.items.forEach((it,ii) => {
-      const k = keys[ii];
-      const row = document.createElement("div");
-      row.className = "item" + (state[k] ? " done":"");
-      row.tabIndex = 0; row.setAttribute("role","checkbox"); row.setAttribute("aria-checked", !!state[k]);
-      row.innerHTML = `<div class="box"></div><div class="txt"><strong>${it.t}</strong><span>${it.d}</span></div>`;
-      const toggle = () => { state[k] = !state[k]; if(!state[k]) delete state[k]; save(); render(); };
-      row.onclick = toggle;
-      row.onkeydown = e => { if(e.key===" "||e.key==="Enter"){ e.preventDefault(); toggle(); } };
-      list.appendChild(row);
-    });
-    sec.appendChild(list); panel.appendChild(sec);
-  });
-  const all = d.sections.flatMap((s,si)=>s.items.map((_,ii)=>`${d.id}.${si}.${ii}`));
-  const n = all.filter(k=>state[k]).length;
-  document.getElementById("count").textContent = `${n} / ${all.length}`;
-  document.getElementById("meter").style.width = (all.length ? n/all.length*100 : 0) + "%";
-  resetBtn.classList.remove("armed"); resetBtn.textContent = "Reset tab";
+ { id:"skills", name:"Skills & Road",
+   intro:"<p><b>Basic control skills: four exercises.</b> They may be run off-road or on the street during the road test. Stop right away if the examiner signals. Before each exercise the examiner explains it, and you can ask questions.</p>",
+   terms:{h:"How the exercises are scored", list:[
+     ["Encroachment","Touching or crossing a boundary line or cone with any part of the vehicle. Mirrors, and parts at or above door-mirror height, don't count. Each one is an error."],
+     ["Pull-up (backing exercises)","Pulling forward to fix your position. Free pull-ups: one on straight-line backing, two on reverse offset backing. Extra pull-ups count as errors. Stopping without changing direction isn't a pull-up."],
+     ["Back-up (forward exercise)","Backing up during forward offset tracking to fix your position. No free back-ups."],
+     ["Look","Opening the door or leaving the seat to look counts as a look. Free looks: one on straight-line backing, two on reverse offset backing. No looks on forward offset tracking."],
+     ["Final position","On the backing exercises, not finishing where the examiner said is penalized and fails the skills test."],
+     ["Unsafe acts","For example, not setting the parking brake or opening the door while moving. These can be an automatic failure, and the examiner may end the test."],
+     ["Getting in and out","Set the parking brake, put the transmission in neutral, face the truck, and keep three points of contact."],
+   ]},
+   sections:[
+   {h:"Basic control skills", exam:true, sim:true, items:[
+     I("sk1","1. Forward stop","Drive forward through the alley and make one stop with the front-most part of the truck inside the stop box, without going past it. Then set the parking brake, shift to neutral, and tap the horn."),
+     I("sk2","2. Straight-line backing","Back straight down the alley until the front of the truck clears the last set of cones. One free pull-up and one free look (exit). Finish with brake set, neutral, horn. Scored on pull-ups, encroachments, and final position."),
+     I("sk3","3. Forward offset tracking","Drive forward and steer left through the opening into the other lane, keeping the right-rear tire between the cone and the line. Stop parallel to the outer boundary at or before the far cones. No free back-ups, and you can't get out to look. Finish with brake set, neutral, horn."),
+     I("sk4","4. Reverse offset backing","Start parallel to the outer boundary. Offset back into the alley and stop with the rear-most part of the trailer in the <span class=num>3 ft</span> box at the end. Finish straight in the alley, inside the lines, without crossing the outer boundary. Two free pull-ups and two free looks. Finish with brake set, neutral, horn."),
+   ]},
+   {h:"Road test: automatic failures", exam:true, note:"Any one of these fails the road test.", items:[
+     I("rt-belt","Not wearing the seat belt","Belt on before moving, every time.",["af"]),
+     I("rt-viol","Moving violation","Disobeying a traffic sign, signal, or law.",["af"]),
+     I("rt-crash","Avoidable crash or incident","Any contact you could have avoided.",["af"]),
+     I("rt-danger","Dangerous act","Any action the examiner judges dangerous.",["af"]),
+     I("rt-curb","Over a curb or sidewalk","Running a tire over a curb or sidewalk when it isn't necessary.",["af"]),
+   ]},
+   {h:"Road test habits", supp:true, note:"General good driving the examiner watches for. Not a numbered test item.", items:[
+     I("rh-mirror","Mirror checks","Check mirrors regularly and before every lane change, turn, and stop."),
+     I("rh-signal","Signal early","Signal well before turns and lane changes; cancel it after."),
+     I("rh-follow","Following distance","At least 1 second for each 10 ft of vehicle length below 40 mph, plus 1 second above 40 mph."),
+     I("rh-right","Right turns","Keep the rear close to the curb; swing wide as you turn, not before."),
+     I("rh-rr","Railroad crossings","Look and listen. Don't shift gears on the tracks."),
+     I("rh-grade","Downgrades","Pick a low gear before the grade. Don't coast."),
+     I("rh-stop","Stops","Stop behind the line, smooth and controlled. No rolling stops."),
+     I("rh-lane","Lane control","Stay centered in your lane. No curb strikes."),
+   ]},
+   {h:"Older maneuvers (practice only)", supp:true, note:"These were on the previous test. They're not part of the four modernized exercises but are still good backing practice.", items:[
+     I("old-offset","Offset back (left/right)","Back from one lane into the next and stop at the end."),
+     I("old-par","Parallel park","Back into a space alongside you without touching the lines or cones."),
+     I("old-alley","Alley dock","Back into a dock from the side and stop near the rear line."),
+   ]},
+ ]},
+
+ { id:"extras", name:"Daily Extras",
+   intro:"<p><b>Not on the test checklist.</b> Good daily checks from the manual's general inspection section (Section 2) and common practice. Use them on real pre-trips; don't spend test time on them unless asked.</p>",
+   sections:[
+   {h:"Engine compartment", supp:true, items:[
+     I("ex-belts","Belts","Snug and not cracked or frayed. Learn how much give your truck's belts should have.",["mfr"]),
+     I("ex-pump","Water pump, alternator, air compressor","Mounted securely, not cracked, no leaks. Know whether each is gear or belt driven.",["mfr"]),
+     I("ex-wire","Wiring","No loose, cracked, or bare wires."),
+   ]},
+   {h:"Brakes and running gear", supp:true, items:[
+     I("ex-slack","Slack adjusters & push rods","Not broken, loose, or missing. If the slack adjuster moves more than about <span class=num>1 in.</span> where the push rod attaches when pulled by hand, it probably needs adjustment (Section 5)."),
+     I("ex-drum","Drums, shoes and linings","Drums not cracked. Shoes or pads not worn dangerously thin, missing, or broken."),
+     I("ex-chamber","Brake chambers","Mounted securely, not leaking."),
+     I("ex-drive","Driveshaft","Not bent or cracked; couplings secure."),
+     I("ex-exh","Exhaust system","Securely mounted, no leaks or soot at the joints."),
+     I("ex-flap","Splash guards / mud flaps","Secure, not dragging or rubbing the tires."),
+     I("ex-doors","Trailer doors","Close and latch securely."),
+   ]},
+   {h:"In the cab", supp:true, items:[
+     I("ex-safe","Safe start","Parking brake set, transmission in neutral (clutch in on a manual) before starting."),
+     I("ex-gauge","Gauges after start","Oil pressure comes up to normal within seconds. Voltmeter normal. Coolant temperature rises gradually."),
+     I("ex-air","Air pressure build-up","With the engine at operating rpm, pressure should build from <span class=num>50 to 90 psi</span> within <span class=num>3 minutes</span> (Section 2).",["mfr"]),
+     I("ex-play","Steering wheel play","More than <span class=num>10°</span> of free play (about 2 in. on a 20 in. wheel) can make steering hard."),
+     I("ex-belt","Seat belt","Latches and releases, not frayed."),
+     I("ex-tank","Drain air tanks","Drain water and oil from the air tanks (if manual drains)."),
+   ]},
+ ]},
+
+ { id:"review", name:"Review" },
+];
+
+/* ---------- Index ---------- */
+const ITEM = {}; const ITEM_TAB = {}; const ITEM_SEC = {};
+TABS.forEach(t => (t.sections||[]).forEach(s => s.items.forEach(it => {
+  if (!ITEM[it.id]) { ITEM[it.id] = it; ITEM_TAB[it.id] = t.id; ITEM_SEC[it.id] = s.h; }
+})));
+
+/* ---------- State (local only) ---------- */
+const KEY = "cdl-checklist-v2";
+const blank = () => ({checks:{}, mem:{}, missed:{}, history:[], mode:"guided", tab:"inspection", run:null});
+let S = blank();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch(e) {}
+// The previous version stored checkmarks under "cdl-check". Items were rewritten for the new
+// test, so those checkmarks can't be mapped; the old key is left untouched, never deleted.
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} };
+try { const h = location.hash.slice(1); if (TABS.some(t => t.id === h)) S.tab = h; } catch(e) {}
+if (!TABS.some(t => t.id === S.tab)) S.tab = "inspection";
+if (!["guided","memory","exam"].includes(S.mode)) S.mode = "guided";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const strip = h => { const d = document.createElement("div"); d.innerHTML = h; return d.textContent; };
+const tabObj = () => TABS.find(t => t.id === S.tab);
+const tabItems = t => (t.sections||[]).flatMap(s => s.items);
+const BADGE = {af:["af","Auto-fail"], mfr:["mfr","Mfr spec"], caution:["caution","Caution"]};
+const badges = it => it.b.length ? `<span class="badges">${it.b.map(b => `<span class="badge ${BADGE[b][0]}">${BADGE[b][1]}</span>`).join("")}</span>` : "";
+
+function simItems(tabId){
+  const t = TABS.find(x => x.id === tabId);
+  if (!t || !t.sections) return [];
+  const out = [];
+  t.sections.filter(s => s.sim).forEach(s => s.items.forEach(it => {
+    if (it.id === "iv-air") AIR.forEach(a => out.push(a.id)); else out.push(it.id);
+  }));
+  return out;
 }
 
-const resetBtn = document.getElementById("reset");
+function addMissed(id){ const m = S.missed[id] || {n:0}; m.n++; m.t = Date.now(); S.missed[id] = m; }
+
+/* ---------- Tabs & modes ---------- */
+const tabsEl = $("tabs");
+function drawTabs(){
+  tabsEl.innerHTML = "";
+  TABS.forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role","tab"); b.id = "tab-" + t.id;
+    b.setAttribute("aria-selected", t.id === S.tab);
+    b.setAttribute("aria-controls","panel");
+    b.tabIndex = t.id === S.tab ? 0 : -1;
+    const n = Object.keys(S.missed).length;
+    b.innerHTML = esc(t.name) + (t.id === "review" && n ? `<span class="dot" aria-label="${n} missed">${n}</span>` : "");
+    b.onclick = () => go(t.id);
+    tabsEl.appendChild(b);
+  });
+}
+tabsEl.addEventListener("keydown", e => {
+  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  const i = TABS.findIndex(t => t.id === S.tab);
+  const j = (i + (e.key === "ArrowRight" ? 1 : -1) + TABS.length) % TABS.length;
+  go(TABS[j].id); $("tab-" + TABS[j].id).focus();
+});
+function go(id){
+  S.tab = id; save();
+  try { history.replaceState(null, "", "#" + id); } catch(e) {}
+  render(); window.scrollTo({top:0});
+}
+document.querySelectorAll("#modes button").forEach(b => b.onclick = () => { S.mode = b.dataset.mode; save(); render(); });
+
+/* ---------- Render ---------- */
+function render(){
+  drawTabs();
+  document.querySelectorAll("#modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === S.mode));
+  $("modes").hidden = S.tab === "review";
+  $("panel").setAttribute("aria-labelledby", "tab-" + S.tab);
+  const t = tabObj();
+  if (t.id === "review") return renderReview();
+  if (S.mode === "exam") return renderExam(t);
+  renderList(t);
+}
+
+function setBar(n, total, label){
+  $("bar").hidden = false;
+  $("count").textContent = `${n} / ${total}`;
+  $("count").setAttribute("aria-label", label || `${n} of ${total} done`);
+  $("meter").style.width = (total ? n / total * 100 : 0) + "%";
+  disarm();
+}
+
+function renderList(t){
+  const P = $("panel"); P.innerHTML = "";
+  P.insertAdjacentHTML("beforeend", `<div class="intro${t.warn ? " warn" : ""}">${t.intro}${S.mode === "memory" ? "<p><b>Memory mode:</b> say the full explanation out loud, then tap <b>Show answer</b> and grade yourself honestly.</p>" : ""}</div>`);
+  if (t.terms) {
+    const sec = document.createElement("section");
+    sec.innerHTML = `<h2>${t.terms.h}<span class="tag t-exam">Test</span></h2><dl class="terms">${t.terms.list.map(([a,b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`;
+    P.appendChild(sec);
+  }
+  t.sections.forEach(s => {
+    const sec = document.createElement("section");
+    const done = s.items.filter(it => S.mode === "memory" ? S.mem[it.id] : S.checks[it.id]).length;
+    sec.innerHTML = `<h2><span>${s.h}${s.exam ? '<span class="tag t-exam">Test</span>' : '<span class="tag supp">Extra</span>'}</span><small>${done}/${s.items.length}</small></h2>${s.note ? `<p class="secnote">${s.note}</p>` : ""}`;
+    const list = document.createElement("div"); list.className = "list";
+    s.items.forEach(it => list.appendChild(S.mode === "memory" ? memRow(it) : guidedRow(it)));
+    sec.appendChild(list); P.appendChild(sec);
+  });
+  const all = tabItems(t);
+  if (S.mode === "memory") {
+    const n = all.filter(it => S.mem[it.id]).length;
+    setBar(n, all.length, `${n} of ${all.length} answered`);
+  } else {
+    const n = all.filter(it => S.checks[it.id]).length;
+    setBar(n, all.length);
+  }
+}
+
+function guidedRow(it){
+  const row = document.createElement("div");
+  const on = !!S.checks[it.id];
+  row.className = "item tap" + (on ? " done" : "");
+  row.tabIndex = 0; row.setAttribute("role","checkbox"); row.setAttribute("aria-checked", on);
+  row.innerHTML = `<div class="box" aria-hidden="true"></div><div class="txt"><strong>${it.n}</strong>${badges(it)}<span class="det">${it.d}</span></div>`;
+  const toggle = () => { if (S.checks[it.id]) delete S.checks[it.id]; else S.checks[it.id] = 1; save(); render(); restoreFocus(it.id); };
+  row.dataset.id = it.id;
+  row.onclick = toggle;
+  row.onkeydown = e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } };
+  return row;
+}
+
+const revealed = new Set();
+function memRow(it, onGrade){
+  const row = document.createElement("div");
+  row.className = "item"; row.dataset.id = it.id;
+  const st = S.mem[it.id];
+  const open = revealed.has(it.id);
+  const chip = st === "ok" ? '<span class="chip ok">Got it</span>' : st === "miss" ? '<span class="chip miss">Review</span>' : "";
+  row.innerHTML = `<div class="txt"><strong>${it.n}</strong>${badges(it)}${chip}
+    <div class="det" ${open ? "" : "hidden"} id="ans-${it.id}">${it.d}</div>
+    <div class="memrow">${open
+      ? `<button type="button" class="btn good" data-g="ok">Got it</button><button type="button" class="btn bad" data-g="miss">Needs review</button>`
+      : `<button type="button" class="btn" data-r="1" aria-expanded="false" aria-controls="ans-${it.id}">Show answer</button>`}</div></div>`;
+  row.querySelectorAll("button").forEach(b => b.onclick = () => {
+    if (b.dataset.r) { revealed.add(it.id); }
+    else {
+      revealed.delete(it.id);
+      S.mem[it.id] = b.dataset.g;
+      if (b.dataset.g === "miss") addMissed(it.id); else delete S.missed[it.id];
+      save();
+      if (onGrade) onGrade(b.dataset.g);
+    }
+    render(); restoreFocus(it.id);
+  });
+  return row;
+}
+function restoreFocus(id){
+  const row = document.querySelector(`[data-id="${id}"]`);
+  if (!row) return;
+  (row.classList.contains("tap") ? row : row.querySelector("button") || row).focus({preventScroll:true});
+}
+
+/* ---------- Exam simulation ---------- */
+function renderExam(t){
+  const P = $("panel"); P.innerHTML = "";
+  $("bar").hidden = true;
+  const ids = simItems(t.id);
+  if (!ids.length) {
+    P.innerHTML = `<div class="empty">Exam simulation covers test items only. Pick <b>Inspection</b>, <b>Air Brake</b>, or <b>Skills &amp; Road</b>.</div>`;
+    return;
+  }
+  const run = S.run && S.run.scope === t.id ? S.run : null;
+  const disclaimer = `<div class="intro warn"><p><b>Unofficial practice simulation.</b> It follows the modernized test order but is not DMV scoring. Only the examiner decides what earns credit.</p></div>`;
+  if (!run) {
+    const label = {inspection:"Vehicle inspection: air brake check first, then the in-cab, lights, and walk-around items", air:"The four-part air brake check", skills:"The four basic control skills exercises"}[t.id];
+    P.innerHTML = disclaimer + `<div class="exam">
+      <div class="where">${ids.length} items</div>
+      <div class="name">${esc(t.name)} exam</div>
+      <p class="say" style="margin:0">${label}. You'll see only the item name. Do it for real: <b>name it, point or touch, and explain out loud</b>. Then mark yourself honestly. Explanations show at the end.</p>
+      <div class="row"><button type="button" class="btn primary big" id="start">Start</button></div></div>`;
+    $("start").onclick = () => { S.run = {scope:t.id, ids, i:0, res:{}}; save(); render(); $("hit") && $("hit").focus(); };
+    return;
+  }
+  if (run.i < run.ids.length) {
+    const it = ITEM[run.ids[run.i]];
+    P.innerHTML = disclaimer + `<div class="exam" aria-live="polite">
+      <div class="where">${run.i + 1} of ${run.ids.length} · ${esc(ITEM_SEC[it.id])}</div>
+      <div class="name">${esc(strip(it.n))}</div>
+      <div class="say">Name it · Point or touch · Explain what you're checking for</div>
+      <div class="row"><button type="button" class="btn good big" id="hit">I covered it</button><button type="button" class="btn bad big" id="miss">Missed / unsure</button></div>
+      <div class="row"><button type="button" class="tool" id="back" ${run.i ? "" : "disabled"}>Back one</button><button type="button" class="tool" id="end">Finish now</button><button type="button" class="tool" id="quit">Quit (no score)</button></div></div>`;
+    const mark = ok => { run.res[it.id] = ok ? 1 : 0; run.i++; save(); render(); const f = $("hit") || $("again"); f && f.focus(); };
+    $("hit").onclick = () => mark(true);
+    $("miss").onclick = () => mark(false);
+    $("back").onclick = () => { run.i = Math.max(0, run.i - 1); save(); render(); $("hit").focus(); };
+    $("end").onclick = () => { run.ids = run.ids.slice(0, run.i); save(); render(); };
+    $("quit").onclick = () => { S.run = null; save(); render(); };
+    return;
+  }
+  // Results
+  if (!run.saved) {
+    const ok = run.ids.filter(id => run.res[id]).length;
+    const af = run.ids.some(id => !run.res[id] && ITEM[id].b.includes("af"));
+    run.ids.filter(id => !run.res[id]).forEach(addMissed);
+    S.history.push({t:Date.now(), scope:run.scope, ok, total:run.ids.length, af});
+    S.history = S.history.slice(-30);
+    run.saved = true; save(); drawTabs();
+  }
+  const ok = run.ids.filter(id => run.res[id]).length, total = run.ids.length;
+  const missed = run.ids.filter(id => !run.res[id]);
+  const af = missed.some(id => ITEM[id].b.includes("af"));
+  const pct = total ? Math.round(ok / total * 100) : 0;
+  P.innerHTML = disclaimer + `<div class="exam">
+    <div class="where">Result · ${esc(t.name)}</div>
+    <div class="score">${ok} / ${total} <small style="font-size:1.2rem">${pct}%</small></div>
+    ${af ? `<p style="margin:0;color:var(--warn);font-weight:600">You missed an automatic-failure item. On the real test, a missed air brake step fails the whole vehicle inspection.</p>` : ""}
+    ${missed.length ? `<p class="say" style="margin:0">${missed.length} item${missed.length > 1 ? "s" : ""} added to Review.</p>` : `<p class="say" style="margin:0">Clean run.</p>`}
+    <div class="row"><button type="button" class="btn primary" id="again">Run again</button>${missed.length ? '<button type="button" class="btn" id="toreview">Practice missed</button>' : ""}</div></div>`;
+  if (missed.length) {
+    const sec = document.createElement("section");
+    sec.innerHTML = `<h2>Missed<small>${missed.length}</small></h2>`;
+    const list = document.createElement("div"); list.className = "list";
+    missed.forEach(id => { const it = ITEM[id]; list.insertAdjacentHTML("beforeend", `<div class="item"><div class="txt"><strong>${it.n}</strong>${badges(it)}<span class="det">${it.d}</span></div></div>`); });
+    sec.appendChild(list); P.appendChild(sec);
+  }
+  const d = document.createElement("details");
+  d.style.marginTop = "16px";
+  d.innerHTML = `<summary>All answers (${total})</summary>` + run.ids.map(id => { const it = ITEM[id]; return `<p><strong>${it.n}</strong> ${run.res[id] ? '<span class="chip ok">Covered</span>' : '<span class="chip miss">Missed</span>'}<span class="det">${it.d}</span></p>`; }).join("");
+  P.appendChild(d);
+  $("again").onclick = () => { S.run = null; save(); render(); };
+  if ($("toreview")) $("toreview").onclick = () => { S.run = null; save(); go("review"); };
+}
+
+/* ---------- Review ---------- */
+function renderReview(){
+  const P = $("panel"); P.innerHTML = "";
+  const ids = Object.keys(S.missed).filter(id => ITEM[id]).sort((a,b) => S.missed[b].n - S.missed[a].n);
+  $("bar").hidden = false;
+  const memAll = Object.keys(S.mem).filter(id => ITEM[id]);
+  const memOk = memAll.filter(id => S.mem[id] === "ok").length;
+  setBar(memOk, memAll.length, `${memOk} of ${memAll.length} memory answers correct`);
+  P.insertAdjacentHTML("beforeend", `<div class="intro"><p><b>Weak spots.</b> Items you marked "Needs review" in Memory mode or missed in an exam sim land here. Say the answer, reveal it, and mark <b>Got it</b> to clear it. The bar shows your Memory-mode accuracy.</p></div>`);
+
+  const sec = document.createElement("section");
+  sec.innerHTML = `<h2>Review missed items<small>${ids.length}</small></h2>`;
+  if (!ids.length) sec.insertAdjacentHTML("beforeend", `<div class="empty">Nothing to review yet. Use <b>Memory</b> or <b>Exam sim</b> on the Inspection, Air Brake, or Skills tabs.</div>`);
+  else {
+    const list = document.createElement("div"); list.className = "list";
+    ids.forEach(id => {
+      const row = memRow(ITEM[id]);
+      row.querySelector(".txt strong").insertAdjacentHTML("afterend", ` <span class="det" style="display:inline">· ${esc(TABS.find(t => t.id === ITEM_TAB[id]).name)} · missed ${S.missed[id].n}×</span>`);
+      list.appendChild(row);
+    });
+    sec.appendChild(list);
+  }
+  P.appendChild(sec);
+
+  const h = document.createElement("section");
+  h.innerHTML = `<h2>Exam sim history<small>${S.history.length}</small></h2>`;
+  if (!S.history.length) h.insertAdjacentHTML("beforeend", `<div class="empty">No exam sims yet.</div>`);
+  else {
+    const rows = S.history.slice().reverse().map((r, i, arr) => {
+      const prev = arr.slice(i + 1).find(x => x.scope === r.scope);
+      const p = Math.round(r.ok / r.total * 100);
+      let delta = "";
+      if (prev) { const pp = Math.round(prev.ok / prev.total * 100); delta = p > pp ? `<span class="up">+${p - pp}</span>` : p < pp ? `<span class="down">${p - pp}</span>` : "="; }
+      const dt = new Date(r.t);
+      return `<tr><td>${dt.toLocaleDateString(undefined,{month:"short",day:"numeric"})} ${dt.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</td><td>${esc(TABS.find(t => t.id === r.scope).name)}</td><td>${r.ok}/${r.total} · ${p}%${r.af ? ' <span class="badge af">Auto-fail</span>' : ""}</td><td>${delta}</td></tr>`;
+    }).join("");
+    h.insertAdjacentHTML("beforeend", `<div class="tablewrap"><table class="hist"><thead><tr><th>When</th><th>Exam</th><th>Score</th><th>vs last</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  }
+  P.appendChild(h);
+
+  const c = document.createElement("section");
+  c.innerHTML = `<h2>Clear data</h2><div class="row"><button type="button" class="tool" id="clrMissed">Clear missed list</button><button type="button" class="tool" id="clrHist">Clear exam history</button><button type="button" class="tool" id="clrAll">Reset everything</button></div>`;
+  P.appendChild(c);
+  confirmBtn($("clrMissed"), () => { S.missed = {}; });
+  confirmBtn($("clrHist"), () => { S.history = []; });
+  confirmBtn($("clrAll"), () => { const m = S.mode; S = blank(); S.mode = m; S.tab = "review"; });
+  $("reset").hidden = true;
+}
+
+/* ---------- Two-tap confirm (no browser dialogs) ---------- */
+function confirmBtn(btn, action){
+  const label = btn.textContent;
+  btn.onclick = () => {
+    if (!btn.classList.contains("armed")) { btn.classList.add("armed"); btn.textContent = "Tap again to confirm"; return; }
+    action(); save(); render(); btn.textContent = label;
+  };
+}
+const resetBtn = $("reset");
+function disarm(){ resetBtn.hidden = S.tab === "review"; resetBtn.classList.remove("armed"); resetBtn.textContent = S.mode === "memory" ? "Reset answers" : "Reset tab"; }
 resetBtn.onclick = () => {
-  if (!resetBtn.classList.contains("armed")) { resetBtn.classList.add("armed"); resetBtn.textContent="Tap to confirm"; return; }
-  Object.keys(state).forEach(k=>{ if(k.startsWith(tab+".")) delete state[k]; });
+  if (!resetBtn.classList.contains("armed")) { resetBtn.classList.add("armed"); resetBtn.textContent = "Tap to confirm"; return; }
+  tabItems(tabObj()).forEach(it => { if (S.mode === "memory") delete S.mem[it.id]; else delete S.checks[it.id]; });
   save(); render();
 };
+
+$("verify").textContent = VERIFY_NOTE;
 render();
+
+/* ---------- Offline (service worker, network-first so updates aren't stuck) ---------- */
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(() => {
+    $("offline").textContent = "Saved for offline use; it updates automatically when you have signal.";
+  }).catch(() => {});
+}
 </script>
 </body>
 </html>
